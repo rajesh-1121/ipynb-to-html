@@ -64,19 +64,33 @@
         #buttons button {
             margin-top: 10px;
         }
+        #stats {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 14px;
+        }
     </style>
 </head>
 <body>
+    <div id="stats">
+        <p>Visits: {{ visits }}</p>
+        <p>Files Converted: {{ conversions }}</p>
+    </div>
+
     <div class="container">
         <h1>Convert IPYNB to HTML</h1>
         <form id="uploadForm">
-            <input type="file" name="file" required>
+            <!-- Allow multiple file uploads by adding the 'multiple' attribute -->
+            <input type="file" name="files" multiple required>
             <button type="submit">Convert</button>
         </form>
         <div id="loading">Processing...</div>
         <div id="buttons">
-            <button id="viewBtn">Show HTML</button>
-            <button id="downloadBtn">Download HTML</button>
+            <div id="resultButtons"></div>
         </div>
     </div>
 
@@ -99,8 +113,22 @@
                     alert('Error: ' + data.error);
                 } else {
                     document.getElementById('buttons').style.display = 'block';
-                    document.getElementById('viewBtn').onclick = () => window.open(data.viewPath, '_blank');
-                    document.getElementById('downloadBtn').onclick = () => window.location.href = data.downloadPath;
+                    const resultButtons = document.getElementById('resultButtons');
+                    resultButtons.innerHTML = ''; // Clear existing buttons
+                    
+                    // Generate view and download buttons for each file
+                    data.files.forEach(file => {
+                        const viewButton = document.createElement('button');
+                        viewButton.innerText = 'View ' + file.name;
+                        viewButton.onclick = () => window.open(file.viewPath, '_blank');
+                        
+                        const downloadButton = document.createElement('button');
+                        downloadButton.innerText = 'Download ' + file.name;
+                        downloadButton.onclick = () => window.location.href = file.downloadPath;
+
+                        resultButtons.appendChild(viewButton);
+                        resultButtons.appendChild(downloadButton);
+                    });
                 }
             })
             .catch(error => {
